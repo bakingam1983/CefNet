@@ -35,12 +35,29 @@ namespace WinFormsCoreApp
 			commandLine.AppendSwitch("enable-media-stream");
 
 			commandLine.AppendSwitch("enable-widevine-cdm");
-			commandLine.AppendSwitchWithValue("cache-path", @"c:\Chrome\1");
-			back = new CefRegisterCDMCallback();
+			CefRegisterCDMCallback back = new CefRegisterCDMCallback();
 
-			CefApi.RegisterWidevineCDM(System.IO.Path.Combine(@"I:\Source\Workspaces\HomeAutomation\AvaloniaHomeServer\bin\Debug\netcoreapp3.1", "widevine"), back);
-			commandLine.AppendSwitchWithValue("widevine-cdm-path", System.IO.Path.Combine(@"I:\Source\Workspaces\HomeAutomation\AvaloniaHomeServer\bin\Debug\netcoreapp3.1", "widevine"));
-			commandLine.AppendSwitchWithValue("widevine-cdm-version", "4.10.1610.0");
+			if (!(System.IO.Directory.Exists(System.IO.Path.Combine(Environment.CurrentDirectory, "ChromeCache"))))
+			{
+				System.IO.Directory.CreateDirectory(System.IO.Path.Combine(Environment.CurrentDirectory, "ChromeCache"));
+			}
+			
+			commandLine.AppendSwitchWithValue("cache-path", System.IO.Path.Combine(Environment.CurrentDirectory, "ChromeCache", "1"));
+
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{									
+				commandLine.AppendSwitchWithValue("widevine-cdm-path", System.IO.Path.Combine(Environment.CurrentDirectory, "cef", "widevine_win_x64"));
+				commandLine.AppendSwitchWithValue("widevine-cdm-version", "4.10.1610.0");
+				CefApi.RegisterWidevineCDM(System.IO.Path.Combine(Environment.CurrentDirectory, "cef", "widevine_win_x64"), back);
+			}
+			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+			{
+				commandLine.AppendSwitchWithValue("widevine-cdm-path", System.IO.Path.Combine(Environment.CurrentDirectory, "cef", "widevine_linux_arm"));
+				commandLine.AppendSwitchWithValue("widevine-cdm-version", "4.10.1610.6");
+				CefApi.RegisterWidevineCDM(System.IO.Path.Combine(Environment.CurrentDirectory, "cef", "widevine_linux_arm"), back);
+			}
+
+			
 			
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
